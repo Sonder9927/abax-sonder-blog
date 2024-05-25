@@ -1,58 +1,66 @@
 ---
-export const prerender = true
+export const prerender = true;
 
-import { getCollection, getEntryBySlug } from 'astro:content'
-import DefaultPageLayout from '$/layouts/default.astro'
-import PostPreviewList from '$/components/PostPreviewList.astro'
-import Prose from '$/components/Prose.astro'
-import { Content as AboutAstroInk } from './_astro-ink.md'
+import PostPreviewList from "$/components/PostPreviewList.astro";
+import Prose from "$/components/Prose.astro";
+import DefaultPageLayout from "$/layouts/default.astro";
+import { getCollection } from "astro:content";
+import { Content as AbaxSonder } from "./_abax-sonder.md";
 
+const title = "Home";
+const description =
+  "Abax gathers and disperses like life and death without any trace.";
 
-const title = 'Home'
-const description = 'Astro-Ink is a crisp, minimal, personal blog theme for Astro'
-
-const posts = await getCollection('blog')
+const posts = await getCollection("blog");
 ---
+
+<!-- src="https://w.wallhaven.cc/full/rd/wallhaven-rdwjj7.jpg" -->
 <DefaultPageLayout content={{ title, description }} showPageHeader={false}>
-    <div class="hero ">
-        <div class="hero__face">
-            <div class="author-card">
-                <img src="https://assets.website-files.com/5e51c674258ffe10d286d30a/5e5358878e2493fbea064dd9_peep-59.svg" title="Aalam" />
-            </div>
-        </div>
-        <div class="hero__says">
-            <Prose>
-                <AboutAstroInk/>
-            </Prose>
-        </div>
+  <div class="hero">
+    <div class="hero__face">
+      <div class="author-card">
+        <img
+          src="https://imgsa.baidu.com/forum/w%3D580/sign=7bac1b31e7c4b7453494b71efffd1e78/56d32f2eb9389b503e3b7d4a8935e5dde6116ee0.jpg"
+          title="Secret"
+        />
+      </div>
     </div>
-    <hr/>
-    <PostPreviewList posts={posts.slice(0, 3)} heading="recent posts"/>
-    <div class="page__actions">
-        <a class="action__go-to-blog ink-h" href="/blog" title="All Posts">All Posts &rarr;</a>
+    <div class="hero__says">
+      <Prose>
+        <AbaxSonder />
+      </Prose>
     </div>
+  </div>
+  <hr />
+  <PostPreviewList posts={posts.slice(0, 3)} heading="recent posts" />
+  <div class="page__actions">
+    <a class="action__go-to-blog ink-h" href="/blog" title="All Posts"
+      >All Posts &rarr;</a
+    >
+  </div>
 </DefaultPageLayout>
 
 <style>
-    .hero {
-        @apply flex flex-col md:flex-row gap-8 w-full transition-all pb-4
-    }
-    .hero__face {
-        @apply flex md:flex-none justify-center
-    }
-    .hero__says {
-        @apply flex-1 text-center md:text-left
-    }
-    .author-card {
-        @apply  h-48 w-48 md:h-56 bg-theme-primary dark:bg-theme-dark-primary rounded-full md:rounded-md shadow-lg
-    }
-    .author-card img {
-        @apply rounded-full h-48 w-48 md:h-56
-    }
-    .page__actions {
-        @apply flex justify-center md:justify-end py-6
-    }
-    .action__go-to-blog {
-        @apply py-4 hover:underline
-    }
+  .hero {
+    @apply flex flex-col md:flex-row gap-8 w-full transition-all pb-4;
+  }
+  .hero__face {
+    @apply flex md:flex-none justify-center;
+  }
+  .hero__says {
+    @apply flex-1 text-center md:text-left;
+  }
+  .author-card {
+    @apply h-48 w-48 md:h-48 bg-white dark:bg-theme-dark-primary rounded-full md:rounded-md shadow-lg;
+  }
+  .author-card img {
+    @apply rounded-full h-48 w-48 md:h-48;
+    object-fit: cover;
+  }
+  .page__actions {
+    @apply flex justify-center md:justify-end py-6;
+  }
+  .action__go-to-blog {
+    @apply py-4 hover:underline;
+  }
 </style>

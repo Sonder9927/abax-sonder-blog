@@ -1,15 +1,36 @@
 ---
-    import { SITE } from '$/config'
-    import ModeLabel from './ModeLabel.svelte'
+import { SITE } from "$/config";
+import ModeLabel from "./ModeLabel.svelte";
 ---
+
 <footer class="footer">
-    <nav class="nav">
-        <div>2021  &copy; Copyright notice |  <a href={ SITE.githubUrl } title={`${ SITE.name }'s Github URL'`}>{ SITE.name }</a>
-        <ModeLabel client:load/> theme on <a href="https://astro.build/">Astro</a></div>
-    </nav>
+  <nav class="nav">
+    <div>
+      2021 &copy; Copyright notice |
+      <a
+        class="unset gradient-link tracking-wider font-bold bg-clip-text text-transparent bg-gradient-to-r from-[#f57111] to-[#f79605] hover:after:bg-gradient-to-r hover:after:from-[#f57111] hover:after:to-[#f79605]"
+        href={SITE.githubUrl}
+        title={`${SITE.name}'s Github URL'`}>{SITE.name}</a
+      >
+      blog with
+      <a
+        class="unset gradient-link tracking-wider font-bold bg-clip-text text-transparent bg-gradient-to-r from-[#00abda] to-[#1476ff] hover:after:bg-gradient-to-r hover:after:from-[#00abda] hover:after:to-[#1476ff]"
+        href={"https://github.com/one-aalam/astro-ink.git"}
+        target="_blank"
+      >
+        astro-ink
+      </a>
+      <ModeLabel client:load />
+      theme and hosted in <a
+        class="unset gradient-link tracking-wider font-bold bg-clip-text text-transparent bg-gradient-to-r from-[#09ff17] to-[#069924] hover:after:bg-gradient-to-r hover:after:from-[#00daba] hover:after:to-[#14ff76]"
+        href={"https://www.netlify.com"}
+        target="_blank">Vercel</a
+      >
+    </div>
+  </nav>
 </footer>
 <style>
-    .footer {
-        @apply py-6 border-t
-    }
+  .footer {
+    @apply py-6 border-t;
+  }
 </style>
