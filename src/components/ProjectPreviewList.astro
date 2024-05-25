@@ -1,0 +1,13 @@
+---
+import ProjectPreview from "./ProjectPreview.astro";
+const { posts } = Astro.props;
+---
+
+<section class="project-preview__list">
+  {posts.map((post) => <ProjectPreview post={post} />)}
+</section>
+<style>
+  .project-preview__list {
+    @apply flex flex-col gap-12;
+  }
+</style>

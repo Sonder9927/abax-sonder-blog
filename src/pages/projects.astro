@@ -1,0 +1,20 @@
+---
+export const prerender = true;
+
+import ProjectPreviewList from "$/components/ProjectPreviewList.astro";
+import DefaultPageLayout from "$/layouts/default.astro";
+import { getCollection } from "astro:content";
+
+let title = "Projects";
+let description = "All the projects researching ...";
+
+// 获取所有项目文件的路径
+const allPosts = await getCollection("projects");
+const sortedPosts = allPosts.sort(
+  (a, b) => new Date(b.data.date) - new Date(a.data.date)
+);
+---
+
+<DefaultPageLayout content={{ title, description }}>
+  <ProjectPreviewList posts={sortedPosts} />
+</DefaultPageLayout>
