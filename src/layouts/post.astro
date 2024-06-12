@@ -159,8 +159,8 @@ const AUTHOR_AVATAR = content.authorImage
                 {AUTHOR_GITHUB ? (
                   <a
                     class="author-card__author"
-                    href={`https://twitter.com/${AUTHOR_GITHUB}`}
-                    title={`${AUTHOR_NAME}'s twitter`}
+                    href={`https://github.com/${AUTHOR_GITHUB}`}
+                    title={`${AUTHOR_NAME}'s github`}
                     target="_blank"
                     rel="external"
                   >
@@ -186,14 +186,14 @@ const AUTHOR_AVATAR = content.authorImage
                   <a
                     class="author-card__follow-btn button"
                     target="_blank"
-                    href={`https://twitter.com/intent/follow?screen_name=${AUTHOR_GITHUB}`}
+                    href={`https://github.com/${AUTHOR_GITHUB}`}
                   >
                     <Icon
                       class="w-5 h-5 inline-block"
                       pack="mdi"
-                      name="twitter"
+                      name="github"
                     />{" "}
-                    Follow on Twitter
+                    Open Github
                   </a>
                 )}
               </div>

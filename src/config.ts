@@ -48,7 +48,7 @@ export const SITE = {
 	authorImage: "", // Example: https://pbs.twimg.com/profile_images/1272979356529221632/sxvncugt_400x400.jpg, https://abs.twimg.com/sticky/default_profile_images/default_profile_normal.png
 	// Author: Bio
 	authorBio:
-		"Youth sentiment is always poetry.",
+		"My life has a limit but knowledge has none.",
 };
 
 // Ink - Theme configuration
