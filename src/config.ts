@@ -31,7 +31,7 @@ export const SITE = {
 	// Your site's detail?
 	name: "Sonder Merak",
 	title: "Abax - Sonder",
-	description: "Youth sentiment is always poetry.",
+	description: "Per Aspera Ad Astra.",
 	url: "https://abax-sonder.vercel.app/",
 	githubUrl: "https://github.com/sonder9927/abax-sonder-blog",
 	listDrafts: true,

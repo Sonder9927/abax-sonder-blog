@@ -1,0 +1,166 @@
+---
+title: rye 搭建 python 和 rust 混合项目
+date: "2023-11-30"
+author: Sonder
+authorGithub: sonder9927
+authorImage: /images/uploads/zard-think.jpg
+category: bug
+tags:
+- code
+- rye
+- python
+- project
+- rust
+description: Rye build python project with rust.
+---
+
+# 虚拟环境管理
+如果想要了解虚拟环境管理工具，学习**下载**和**使用**，推荐看看这篇文章[一篇文章带你上手 Conda、Poetry 与 Pdm，轻松搭建 Python 虚拟多版本复杂开发环境](https://blog.well404.top/2022/08/17/%E8%99%9A%E6%8B%9F%E7%8E%AF%E5%A2%83/)
+## conda
+conda 拥有较高的独立性以及强悍的跨版本支持，但conda 对于虚拟环境的管理便显得非常 “力大砖飞”，其在每个虚拟环境中均包含了一个独立的 python和相关库，即便是在统一系统中已经有了该版本的 python 解释器也会创建一个新的解释器专供该环境使用。因此，conda 最大的缺点就是浪费磁盘空间。
+
+> conda 的优势：简单易学、跨版本、独立性、兼容性极高、科学计算指定环境
+>
+> conda 的劣势：体积大、复用度低
+
+## poetry pdm rye
+- poetry
+
+作为一个传统虚拟环境的实现，[poetry](https://github.com/python-poetry/poetry) 凭借其强大的依赖分析能力被大量项目所推荐的虚拟环境管理工具。目前PyCharm也支持Poetry。
+
+> poetry 的优势：分析能力极强、社区资源丰富、兼容性优秀、使用广泛
+>
+> poetry 的劣势：对老旧版本的 python 不兼容、略微复杂
+
+- pdm
+
+[pdm](https://pdm-project.org/latest/) 是目前 [PEP582](https://peps.python.org/pep-0582/)
+ 的实现，PEP582 有 3 个非常明显的特点：
+> 1. 指定了一个相对固定的依赖存放位置
+> 2. 兼容公共依赖
+> 3. 并不需要激活 / 关闭虚拟环境
+
+同时，pdm 的开发者 [Frost Ming](https://github.com/frostming) 是国人开发者，并且在项目中添加了中文版的 [README](https://github.com/pdm-project/pdm/blob/main/README_zh.md)，其 cli 设计相对 poetry 更加友好与美观（很重要）。
+
+- rye
+
+Python 目前的包管理工具多得让人眼花缭乱，包括 poetry、pip、pipenv、pyenv、venv、virtualenv、pdm、hatch 等等，它们都是优秀的工具，提出时都是解决了一定的问题，但没有哪个工具能够做到主流，因此也增加了系统的碎片化程度，而 Conda 和操作系统的包管理器也存在环境目录很大，内部机制不透明问题。
+Flask 作者 Armin Ronacher 用 Rust 开发的 rye，借鉴了 Rust 包管理的经验，试图提供一个标准化的解决方案。 [Philosophy and Vision](https://rye-up.com/philosophy/) 这篇文章展示了 rye 的设计哲学。
+
+# 用rust为python提供API
+Rust 是底层语言有更高的性能，其所有权的设计思想，能够最大限度地避免内存错误。
+平时说的Python，实际上指的是 CPython，即 C 语言实现的 Python。Rust 对于 Python 的扩展开发是基于 C 语言的桥接模式。Rust 可以直接继承 C/C++ 的所有工具和库，也能够支持把自己编译成与 C 一样的动态链接库，目前用 Rust 写扩展已成为 C 语言的有力竞争者，主要推动者是 [PyO3](https://github.com/PyO3/pyo3)，因为它为 Python 提供 了 Rust 绑定。
+
+关于pyo3在绑定rust和python的方法，构建pyo3工程的工具[maturin](https://github.com/PyO3/maturin)，在此先不介绍，只需要知道：
+1. 使用`maturin`初始化pyo3项目。（实际上rye初始化就包括了这步）
+2. 在rust中写好的函数和类
+3. `maturin develop`更新。
+3. 在python脚本中进行调用。
+
+# 项目搭建
+## 安装 rye
+1. 安装 `rustup`
+    ```sh
+
+    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh   
+    # 执行完后，重启 Shell
+    cargo -V
+    ```
+2. `cargo` 安装 `rye`
+    ```sh
+
+    cargo install --git https://github.com/mitsuhiko/rye rye
+    rye -h
+    rye self update
+    ```
+
+## 初始化
+官方文档[Rust Modules](https://rye-up.com/guide/rust/)
+```sh
+
+rye init rye-rp  --build-system maturin
+cd rye-rp
+```
+目录结构：
+```
+
+rye-rp
+├── .git
+├── .gitignore
+├── .python-version
+├── README.md
+├── pyproject.toml
+├── Cargo.toml
+├── python
+    └── rye_rp
+        └── __init__.py
+└── src
+    └── lib.rs
+```
+如果要设置python版本：
+
+```sh
+
+rye pin 3.12
+rye sync
+```
+安装全局`maturin`：
+
+```sh
+rye install maturin
+```
+maturin 开发需要将 pip 安装到 virtualenv 中。而rye是不安装pip的，所以在使用之前，需要添加：
+```sh
+
+rye add --dev pip
+rye sync
+```
+
+Rye 建议混合使用 python/rust 模块。在这种情况下可以通过运行 `maturin develop --skip-install` 来节省一些宝贵的迭代时间：
+```sh
+maturin develop --skip-install
+```
+
+在`python/rye_rp/`目录下出现了`_lowlevel.cpython-312-x86_64-linux-gnu.so`文件。
+
+## 函数测试
+1. 先看rust封装的函数，在`src/lib.rs`文件中：
+    ```rust
+
+    use pyo3::prelude::*;
+
+    #[pyfunction]
+    fn hello() -> PyResult<String> {
+        Ok("Hello from rye-rp!".into())
+    }
+
+    #[pymodule]
+    fn _lowlevel(_py: Python, m:&PyModule) -> PyResult<()> {
+        m.add_function(wrap_pyfunction!(hello, m)?)?;
+        Ok(())
+    }
+    ```
+   已知rust提供了一个`hello`函数，会返回一个字符串。
+2. 检查`python/rye_rp/__init__.py`：
+    ```python
+
+    from rye_rp._lowlevel import hello
+
+    __all__ = ["hello"]
+    ```
+    看到已经导入了这个函数。
+
+3. 写个脚本打印这个字符串，脚本`script.py`：
+    ```python
+
+    from rye_rp import hello
+
+    print(hello())
+    ```
+
+    运行成功：
+    ```sh
+
+    python script.py
+    # Hello from rye-rp!
+    ```
