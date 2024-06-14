@@ -1,0 +1,72 @@
+---
+title: Manage git repository 仓库管理
+date: "2024-01-27"
+author: Sonder
+authorGithub: sonder9927
+authorImage: /images/uploads/zard-think.jpg
+category: code
+tags:
+- git
+- project
+description: Manage git repository with `projj`.
+---
+
+# 描述
+使用 [projj](https://github.com/popomore/projj) 和 [better-commits](https://github.com/Everduin94/better-commits) 管理 git 仓库
+
+# 安装
+## npm
+```sh
+
+pacman -Sy nodejs npm
+sudo chown -R $(whoami) ~/.npm
+# change source
+npm config set registry https://registry.npmmirror.com/
+
+# install nrm to manage sources
+npm i -g nrm
+# list sources
+nrm ls
+nrm current
+# add source
+nrm add taobao https://registry.npmmirror.com/
+```
+
+## projj & better-commits
+```sh
+npm i -g projj better-commits
+```
+## 操作步骤
+### 初始化
+```sh
+
+projj init
+# set base directory
+# or change base directory, default is ~/projj, to /path/to/code
+vi ~/.projj/config.json
+```
+### 导入旧的 repo
+
+```sh
+
+# import existed repo
+projj import /path/to/repo
+projj find <repo>
+<Ctrl-v> # paste
+# create a repository-specific config
+better-commits-init
+```
+
+### 添加新的 repo
+
+```sh
+
+# add new repo
+projj add <git-repo>
+<C-v>
+better-commits-init
+# stage some changes
+better-commits
+```
+
+可以利用 `projj` 提供的 `alias` 功能

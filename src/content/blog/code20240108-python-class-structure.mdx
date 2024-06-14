@@ -1,0 +1,57 @@
+---
+title: Pythonic class structure
+date: "2024-01-08"
+author: Sonder
+authorGithub: sonder9927
+authorImage: /images/uploads/zard-think.jpg
+category: code
+tags:
+- python
+- project
+description: Pythonic `class` structure.
+---
+
+# 描述
+Python 理想的 `class` 结构。
+cf. [【提升Python技能】 Python类的约定 理想的类结构](https://www.bilibili.com/video/BV1vY411T79m/?spm_id_from=333.999.0.0&vd_source=c6295c977cbd3c06c9aa840e805a2f72)
+
+# 结构
+
+```python
+
+class ClassName:
+    # 类变量
+    name = ...
+    
+    # init方法
+    def __init__(self, ...):
+        pass
+
+    # magic方法
+    def __call__(self):
+        pass
+    def __str__(self):
+        pass
+    def __repr__(self):
+        pass
+    def __len__(self):
+        pass
+
+    # 类方法
+    @classmethod
+    def some_class_method(cls, ...):
+        pass
+
+    # 静态方法
+    @staticmethod
+    def some_static_method(...):
+        pass
+
+    # 私有方法
+    def _some_private_method(self, ...):
+        pass
+
+    # 实例方法
+    def some_method(self, ...):
+        pass
+```

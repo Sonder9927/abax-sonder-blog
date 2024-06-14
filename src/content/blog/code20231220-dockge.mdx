@@ -1,0 +1,125 @@
+---
+title: Dockge 管理 docker 容器
+date: "2024-01-08"
+author: Sonder
+authorGithub: sonder9927
+authorImage: /images/uploads/zard-think.jpg
+category: code
+tags:
+- code
+- docker
+- nginx
+description: Use `dockge` to manage docker containers.
+image: /images/post-images/dockge.png
+---
+
+# dockge
+[Dockge](https://github.com/louislam/dockge) 由备受赞誉的 Uptime Kuma 的作者开发，是一款时尚，提供了简化的用户体验，易于使用的管理器。
+
+## 部署
+1. 先安装 docker
+
+    一个脚本化流程：
+    ```sh
+
+    apt-get update 
+    apt-get upgrade -y 
+
+    curl -fsSL https://get.docker.com -o get-docker.sh 
+    sh get-docker.sh
+    usermod -aG docker $USER
+    rm get-docker.sh
+    ```
+
+    执行 `systemctl status docker`，确保 docker 是激活的状态。
+
+2. 新建用于部署 dockge 的文件夹
+    ```sh
+
+    mkdir -p /opt/stacks /opt/dockge
+    cd /opt/dockge
+    ```
+    官方 compose.yaml 要求使用 stacks 的绝对路径。
+
+3. 下载官方 compose.yaml
+    ```sh
+    curl https://raw.githubusercontent.com/louislam/dockge/master/compose.yaml --output compose.yaml
+    ```
+4. 运行
+    ```sh
+    docker compose up -d
+    ```
+
+    使用 `docker compose`（不带 -） 或者 `docker-cimpose`（带 -） 都行。
+
+## 初始化
+
+浏览器打开 [http://\<ip>:3001]()，创建管理用户。
+
+<img src="/images/post-images/dockge-init.png" alt="dockge-init.png" width="72%" />
+
+进入后能看到容器运行状态。以安装 uptime-kuma 为例：
+
+1. 打开[官网](https://github.com/louislam/uptime-kuma)，复制 docker 命令。
+
+    ```sh
+    docker run -d --restart=always -p 3001:3001 -v uptime-kuma:/app/data --name uptime-kuma louislam/uptime-kuma:1
+    ```
+
+2. 返回 dockge，在docker启动处复制，点击转换为 compose 格式。
+
+    <img src="/images/post-images/dockge-convert-compose.png" alt="dockge-convert-compose.png" width="70%" />
+
+
+可以手动修改容器信息，设置完成后点击部署。
+
+<img src="/images/post-images/dockge-kuma.png" alt="dockge-kuma.png" width="72%" />
+
+点击端口号进入 uptime-kuma 服务界面。
+
+
+<img src="/images/post-images/uptime-kuma.png" alt="uptime-kuma.png" width="72%" />
+
+比如检测 dockge 服务，即 `http://<ip>:5001`。
+
+<img src="/images/post-images/uptime-kuma-dockge.png" alt="kuma-dockge.png" width="72%" />
+
+## 反向代理
+### NPM
+在dockge 部署 [Nginx Proxy Manager](https://nginxproxymanager.com/)
+
+官方提供的 `compose.yaml`:
+
+```yaml
+
+version: '3.8'
+services:
+  app:
+    image: 'jc21/nginx-proxy-manager:latest'
+    restart: unless-stopped
+    ports:
+      - '80:80'
+      - '81:81'
+      - '443:443'
+    volumes:
+      - ./data:/data
+      - ./letsencrypt:/etc/letsencrypt
+```
+还有使用 sql 数据库和 secrets 的，这里只选择最简单的进行演示。
+
+<img src="/images/post-images/dockge-npm.png" alt="dockge-npm.png" width="72%" />
+
+80端口是 Congratulations 之类欢迎界面。81 是 NPM 服务界面。初始用户和密码是`admin@example.com` 和 `changeme`，登录后会要求更新邮箱和密码。
+### 开启代理
+新增代理：
+<img src="/images/post-images/npm-proxy.png" alt="npm-proxy.png" width="72%" />
+
+<img src="/images/post-images/npm-proxy-new.png" alt="npm-proxy-new.png" width="72%" />
+
+代理 81 端口比较简单，但如果是 dockge 的 5001 端口，需要打开 `Websockets Support`，不然**无法连接到 socket 服务**。
+
+### 问题
+我想用 dockge 开启不同服务后，用 `http://<ip>/<server>` 这种形式访问。用 nginx 的话就是编写 location ，NPM里面也有`custom locations`，但是我设置不成功。
+
+尝试过不用 ip 用 `ip addr show docker0` 显示的内网，容器连接相同网络，都没用。感觉还是 socket 的问题。应该再看看 docker 和 nginx 的知识。
+

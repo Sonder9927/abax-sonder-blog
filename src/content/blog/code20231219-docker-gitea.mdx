@@ -1,0 +1,430 @@
+---
+title: Docker build gitea & gitlab
+date: "2023-12-19"
+author: Sonder
+authorGithub: sonder9927
+authorImage: /images/uploads/zard-think.jpg
+category: code
+tags:
+- docker
+- project
+- gitea
+- git
+description: Use docker to build gitea and gitlab.
+---
+
+# docker
+安装 `docker` 和 `docker-compose`，最好参照官网 [meet the prerequisites](https://docs.docker.com/engine/install/ubuntu/#prerequisites)，先卸载干净再安装。
+
+docker 安装成功后，可能无法启动服务，推荐下面几个 debug 的指令，找到错误后针对性地上网找解决方法。
+
+```sh
+
+# `sudo` maybe needed
+dockerd --debug
+systemctl status docker
+systemctl restart docker
+journalctl -xe | grep docker
+vi /etc/docker/daemon.json
+systemctl daemon-reload
+freee -h
+df -h
+```
+确保 docker 是 active(running) 的。
+
+<img src="/images/post-images/docker-status.png" alt="docker-status" width="72%" />
+
+部署时最好不要在挂载盘上启动docker-compose，我当时报了`Error executing action `run` on resource 'ruby_block[directory resource: /data/GitLab]'`这种错，换到系统盘启动docker-compose.yml就没事了。数据文件可以放在挂载盘。
+
+---
+推荐使用 [dockge](https://github.com/louislam/dockge) 管理docker。
+可以看一下 [Docker 项目分享 - dockge- 管理 docker 项目从未如此简单 可视化面板管理项目 uptime kuma 同作者](https://www.bilibili.com/video/BV1CC4y1F7zm/?spm_id_from=333.880.my_history.page.click&vd_source=c6295c977cbd3c06c9aa840e805a2f72)。
+
+
+# gitlab
+
+浅试了 gitlab，能够成功搭建。gitlab比较吃资源，我的服务器性能不高，没有继续使用，转用gitea了。
+
+gitlab 的 `docker-compose.yml`：
+```yml
+
+version: '3'
+
+services:
+  gitlab:
+    image: 'gitlab/gitlab-ce'
+    container_name: 'gitlab'
+    restart: always
+    hostname: '<host>'
+    environment:
+      GITLAB_OMNIBUS_CONFIG: |
+        external_url 'http://<host>:8929'
+        gitlab_rails['gitlab_shell_ssh_port'] = 2224
+    ports:
+      - '8929:8929'
+      - '2224:22'
+    volumes:
+      - '/path/to/config:/etc/gitlab'
+      - '/path/to/logs:/var/log/gitlab'
+      - '/path/to/data:/var/opt/gitlab'
+      - '/path/to/backups:/var/opt/gitlab/backups'
+    cap_add:
+      - SYS_ADMIN
+      - DAC_READ_SEARCH
+    shm_size: '256m'
+```
+# gitea
+
+[Gitea](https://docs.gitea.com/zh-cn/) 是一个轻量级的 DevOps 平台软件。从开发计划到产品成型的整个软件生命周期，他都能够高效而轻松的帮助团队和开发者。包括 Git 托管、代码审查、团队协作、软件包注册和 CI/CD。它与 GitHub、Bitbucket 和 GitLab 等比较类似。 Gitea 最初是从 [Gogs](http://gogs.io/) 分支而来，几乎所有代码都已更改。
+## 预先准备
+参考[小小树莓派干大事 - 自部署 Git 库（一）](https://zhuanlan.zhihu.com/p/488776808)这篇文章。
+
+先创建宿主操作系统上的一个新用户 git 来运行 Gitea 的整个 Docker 镜像程序。
+
+```sh
+
+sudo adduser git
+#Adding user `git' ...
+#Adding new group `git' (1003) ...
+#Adding new user `git' (1002) with group `git' ...
+```
+记住上面自动创建的 user 和 group 的 id，1002 和 1003。
+
+添加到docker组，不然报错：
+
+`permission denied while trying to connect to the Docker daemon socket at unix:///var/run/docker.sock: Get "http://%2Fvar%2Frun%2Fdocker.sock/v1.44/containers/json?all=1&filters=%7B%22label%22%3A%7B%22com.docker.compose.config-hash%22%3Atrue%2C%22com.docker.compose.project%3Dgitea%22%3Atrue%7D%7D": dial unix /var/run/docker.sock: connect: permission denied`
+
+```sh
+
+sudo usermod -aG docker git
+sudo usermod -aG docker $USER
+```
+应该是添加`git`来着，记不清了，都添加也行。
+
+## 部署
+gitea 的 `docker-compose.yml`：
+
+```yml
+
+version: '3'
+
+networks:
+  gitea:
+    external: false
+
+services:
+  server:
+    image: gitea/gitea:latest
+    container_name: gitea
+    environment:
+      - USER_UID=1002
+      - USER_GID=1003
+      - GITEA__database__DB__TYPE=mysql
+      - GITEA__database__HOST=db:3306
+      - GITEA__database__USER=gitea
+      - GITEA__database__PASSWD=gitea
+      - GITEA__database__NAME=gitea
+    restart: always
+    networks:
+        - gitea
+    ports:
+      - '3000:3000'
+      - '2222:22'
+    volumes:
+      - /home/git/.ssh:/data/git/.ssh
+      - ./gitea-data:/data
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+    depends_on:
+      - db
+
+  db:
+    image: mariadb:10
+    container_name: mariadb
+    restart: always
+    environment:
+      - MYSQL_ROOT_PASSWORD=maria
+      - MYSQL_USER=gitea
+      - MYSQL_PASSWORD=gitea
+      - MYSQL_DATABASE=gitea
+      - MYSQL_LOG_CONSOLE=true
+    ports:
+      - 3307:3306
+    networks:
+      - gitea
+    volumes:
+      - ./maria/data:/var/lib/mysql
+      - ./maria/conf:/etc/mysql/conf.d
+```
+运行`docker-compose up -d`，在浏览器打开`http://<host>:3000`，就能打开 gitea 初始化界面，数据库类型选择 mysql，第一个注册的用户将成为管理员。
+
+数据库使用 `<host>` 和端口号 `3307`，用户、密码和数据库在 yml 文件中配置了，连接数据库后可以新增用户和数据库。
+## 修改配置
+修改 `gitea-data/gitea/conf/app.ini` 文件，如注册和权限等默认设置。
+## 端口
+
+**问题**：http 和 ssh 的端口暴露不够优雅，而且仓库的 ssh 链接显示是没有端口的，复制链接后还得自己加上端口号。
+
+**解决**：
+1. ssh 端口问题
+
+    使用 Gitea 官网的 [SSHing Shim 方式](https://docs.gitea.io/en-us/install-with-docker/#sshing-shim-with-authorized_keys)。在宿主机上依次执行：
+
+    ```sh
+
+    sudo -u git ssh-keygen -t rsa -b 4096 -C "Gitea Host Key"
+    sudo -u git cat /home/git/.ssh/id_rsa.pub | sudo -u git tee -a /home/git/.ssh/authorized_keys
+    sudo -u git chmod 600 /home/git/.ssh/authorized_keys
+    cat <<"EOF" | sudo tee /usr/local/bin/gitea
+    #!/bin/sh
+    ssh -p 2222 -o StrictHostKeyChecking=no git@127.0.0.1         
+    "SSH_ORIGINAL_COMMAND=\"$SSH_ORIGINAL_COMMAND\" $0 $@"
+    EOF
+    sudo chmod +x /usr/local/bin/gitea
+    ```
+
+    配置完成后， 重新启动 Docker 容器：`docker-compose up --force-recreate --build -d` 即完成。
+
+2. http 端口问题
+    
+    官方是用 nginx 做的[反向代理](https://docs.gitea.com/zh-cn/administration/reverse-proxies#%E4%BD%BF%E7%94%A8-nginx-%E4%BD%9C%E4%B8%BA%E5%8F%8D%E5%90%91%E4%BB%A3%E7%90%86%E6%9C%8D%E5%8A%A1)，因为我还需要部署一个静态网页，所以新增了些内容。
+
+
+    在 yml 文件中添加 nginx 容器：
+
+    ```yml
+
+    nginx:
+    image: nginx:latest
+    container_name: nginx
+    ports:
+        - "80:80"
+        - "443:443"
+    volumes:
+        - ./nginx/www:/usr/share/nginx/html
+        - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+        - ./nginx/servers:/etc/nginx/servers:ro
+    networks:
+        - gitea
+    depends_on:
+        - server
+    ```
+
+    nginx 的配置文件 `nginx/nginx.conf`：
+
+    ```conf
+
+    worker_processes 2;
+
+    events {
+    worker_connections 1024;
+    }
+
+    http {
+    include mime.types;
+    default_type application/octet-stream;
+
+    sendfile on;
+    keepalive_timeout 65;
+
+    server {
+        listen 80;
+        server_name <host>;
+        access_log host.access.log;
+
+        location / {
+        proxy_pass http://server:3000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+        location /<sub_site_name> {
+        alias /usr/share/nginx/html;
+        index index.html index.htm;
+        }
+
+        error_page 500 502 503 504 /50x.html;
+        location = /50.html {
+        root /usr/share/nginx/html;
+        }
+    }
+    # include servers/*.conf;
+    }
+    ```
+
+浏览器打开`http://<host>`就能打开 gitea，包括 http 传输都不用加端口号了。此时 gitea 的仓库 http 链接还是有端口号的，修改 `gitea-data/gitea/conf/app.ini` 文件就行。
+
+**说明**：只是代理了端口号，没有禁止端口访问，所以 `http://<host>:3000` 也能访问。
+
+浏览器打开`http://<host>/<sub_site_name>` 就能打开我构建在 `nginx/www` 里的网页了。配合 [自定义 Gitea 页面](https://docs.gitea.com/zh-cn/administration/customizing-gitea#%E8%87%AA%E5%AE%9A%E4%B9%89-gitea-%E9%A1%B5%E9%9D%A2)，写一个 `gitea-data/gitea/templates/custom/extra_links.tmpl` 文件就能在导航栏新增链接了。其内容是
+
+```html
+
+<a class="item" href="{{AppSubUrl}}/<sub_site_name>">site name</a>
+```
+
+## smtp 邮件服务
+[官方 smtp 说明](https://docs.gitea.com/zh-cn/administration/email-setup#%E4%BD%BF%E7%94%A8-smtp)
+
+```ini
+
+[mailer]
+ENABLED        = true
+FROM           = <email>
+PROTOCOL    = smtps
+SMTP_ADDR      = <smtp_address>
+SMTP_PORT      = <smtp_port>
+USER           = <email>
+PASSWD         = `<passwd>`
+```
+`<email>`就是用来发邮件的邮箱地址，关于 `<smtp_address>` 和 `<smtp_port>`，需要给邮箱打开 smtp 服务，可以看一下[QQ 邮箱 网易邮箱及企业邮箱开通 SMTP/POP3 及设置授权码（客户端专用密码）的方法大全](https://zhuanlan.zhihu.com/p/551399559?utm_id=0&wd=&eqid=bb018c6f000023ba0000000464765a52)
+密码可以使用真实邮箱密码（不推荐），也可使用开启 smtp 服务后生成的授权码，也叫第三方登录密码。
+
+自动发的邮件有时候会被当做垃圾邮件拒发，查看 email 邮箱，手动激活验证码就行。或者换一个邮箱，我用 qq 邮箱没问题，学校邮箱就被拒发了。
+
+## actions
+
+[官方 actions 说明](https://docs.gitea.com/zh-cn/usage/actions/quickstart)
+
+1. 进入仓库设置，打开 actions。
+
+2. 注册 runner。
+
+    在 gitea 里获取注册用的 `token`，只能使用一次，并且不能用于注册多个 Runner。 可以从以下位置获取不同级别的 token, 从而创建出相应级别的 runner：
+
+    - 实例级别：管理员设置页面，例如 \<your_gitea.com>/admin/actions/runners。
+    - 组织级别：组织设置页面，例如 \<your_gitea.com>/\<org>/settings/actions/runners。
+    - 存储库级别：存储库设置页面，例如 \<your_gitea.com>/\<owner>/\<repo>/settings/actions/runners。
+
+    [使用 Docker 注册 Runner](https://docs.gitea.com/zh-cn/usage/actions/act-runner#%E4%BD%BF%E7%94%A8docker%E6%B3%A8%E5%86%8Crunner)
+
+    ```yml
+
+    version: "3.8"
+    services:
+    runner:
+        image: gitea/act_runner:nightly
+        environment:
+        CONFIG_FILE: /config.yaml
+        GITEA_INSTANCE_URL: "${INSTANCE_URL}"
+        GITEA_RUNNER_REGISTRATION_TOKEN: "${REGISTRATION_TOKEN}"
+        GITEA_RUNNER_NAME: "${RUNNER_NAME}"
+        GITEA_RUNNER_LABELS: "${RUNNER_LABELS}"
+        volumes:
+        - ./config.yaml:/config.yaml
+        - ./data:/data
+        - /var/run/docker.sock:/var/run/docker.sock
+    ```
+    在 gitea 后台查看 runner 是否注册成功以及状态，如果是离线在宿主机执行 `docker restart runner`，runner 是容器名称，执行`docker ps`可以查看容器运行状态。
+
+3. 编写 `.gitea/workflows/demo.yaml`，文件名可以不一样。
+    ```yaml
+
+    name: Gitea Actions Demo
+    run-name: ${{ gitea.actor }} is testing out Gitea Actions 🚀
+    on: [push]
+
+    jobs:
+    Explore-Gitea-Actions:
+        runs-on: ubuntu-latest
+        steps:
+        - run: echo "🎉 The job was automatically triggered by a ${{ gitea.event_name }} event."
+        - run: echo "🐧 This job is now running on a ${{ runner.os }} server hosted by Gitea!"
+        - run: echo "🔎 The name of your branch is ${{ gitea.ref }} and your repository is ${{ gitea.repository }}."
+        - name: Check out repository code
+            uses: actions/checkout@v3
+        - run: echo "💡 The ${{ gitea.repository }} repository has been cloned to the runner."
+        - run: echo "🖥️ The workflow is now ready to test your code on the runner."
+        - name: List files in the repository
+            run: |
+            ls ${{ gitea.workspace }}
+        - run: echo "🍏 This job's status is ${{ job.status }}."
+    ```
+
+4. 每次 `git  push` 后都会自动执行。
+
+## 最终的 yml 文件
+
+注意第一次执行时不要带上 act_runner，因为他需要 gitea 的 token。
+
+```yml
+
+version: '3'
+
+networks:
+  gitea:
+    external: false
+
+services:
+  server:
+    image: gitea/gitea:latest
+    container_name: gitea
+    environment:
+      - USER_UID=1002
+      - USER_GID=1003
+      - GITEA__database__DB__TYPE=mysql
+      - GITEA__database__HOST=db:3306
+      - GITEA__database__USER=gitea
+      - GITEA__database__PASSWD=gitea
+      - GITEA__database__NAME=gitea
+    restart: always
+    networks:
+        - gitea
+    ports:
+      - '3000:3000'
+      - '2222:22'
+    volumes:
+      - /home/git/.ssh:/data/git/.ssh
+      - ./gitea-data:/data
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+    depends_on:
+      - db
+
+  db:
+    image: mariadb:10
+    container_name: mariadb
+    restart: always
+    environment:
+      - MYSQL_ROOT_PASSWORD=maria
+      - MYSQL_USER=gitea
+      - MYSQL_PASSWORD=gitea
+      - MYSQL_DATABASE=gitea
+      - MYSQL_LOG_CONSOLE=true
+    ports:
+      - 3307:3306
+    networks:
+      - gitea
+    volumes:
+      - ./maria/data:/var/lib/mysql
+      - ./maria/conf:/etc/mysql/conf.d
+
+  nginx:
+    image: nginx:latest
+    container_name: nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/www:/usr/share/nginx/html
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/servers:/etc/nginx/servers:ro
+    networks:
+      - gitea
+    depends_on:
+      - server
+
+  runner:
+    image: gitea/act_runner:nightly
+    container_name: gitea_runner
+    environment:
+      CONFIG_FILE: /config.yaml
+      GITEA_INSTANCE_URL: "http://<host>:3000"
+      GITEA_RUNNER_REGISTRATION_TOKEN: "<token>"
+      GITEA_RUNNER_NAME: "mkdocs"
+    volumes:
+      - ./runner-data/config.yaml:/config.yaml
+      - ./runner-data:/data
+      - /var/run/docker.sock:/var/run/docker.sock
+```

@@ -1,0 +1,89 @@
+---
+title: 在rye管理下使用mkdocs
+date: "2023-12-12"
+author: Sonder
+authorGithub: sonder9927
+authorImage: /images/uploads/zard-think.jpg
+category: code
+tags:
+- python
+- project
+- doc
+- rye
+description: Use `mkdocs` in project managed by rye.
+---
+
+# 描述
+按照 [A Modern Python Package Template - MPPT](https://datahonor.com/mppt/)学习 python 项目结构。
+尝试在[rye 搭建 python 和 rust 混合项目](https://www.jianshu.com/p/adda1eaa0594)基础上，添加文档和任务执行器。
+-  Documentation：[Mkdocs](https://www.mkdocs.org/)。
+    
+    MKDOCS 是一个快速，简单，彻头彻尾的华丽静态站点生成器，旨在构建项目文档。  文档源文件写在 Markdown 中，并配置了一个 YAML 配置文件。
+
+- Taskrunner：使用rye的scripts就不错，在此尝试了 [**duty**](https://pawamoy.github.io/duty/) 和 [**just**](https://just.systems/man/en/)。
+
+目前我需要执行的任务比较简单，按照官方文档介绍写就行了，本文主要介绍用 mkdocs 为代码写文档。
+
+# mkdocs 基本命令
+1. 初始化
+    ```sh
+    pip install mkdocs
+    mkdocs new project
+
+    project
+    |_ mkdocs.yml
+    |_ docs
+      |_ index.mk
+    ```
+2. 更改主题
+    下载主题
+    ```shell
+    pip install mkdocs-material
+    ```
+    修改`mkdocs.yml`
+    ```yml
+    site_name: MkLorum
+    nav:
+      - Home: index.md
+    theme: material
+    ```
+
+3. 启动服务
+
+    ```sh
+    mkdocs serve
+    ```
+
+    浏览器打开`http://127.0.0.1:8000/`
+4. 制作网站
+    ```sh
+    mkdocs build
+    ```
+
+浏览器打开 `file:///path/to/project/site/index.html`
+
+# rye 下的配置
+
+rye不想暴露pip，使用 `rye install` 全局安装mkdocs和mkdocs-material可能无法正常调用。
+需要用 rye 在这个项目下的隐藏文件夹`.venv` 里的pip，即在虚拟环境中安装：
+
+1. 首先在开发环境下安装pip
+
+    ```sh
+
+    rye add --dev pip
+    rye sync
+    ```
+
+2. 启动rye的shell：
+    ```sh
+
+    rye shell
+    pip install mkdocs mkdocs-material
+    ```
+
+2. 不启动：
+
+    ```sh
+    rye run pip install mkdocs mkdocs-material 
+    ```
