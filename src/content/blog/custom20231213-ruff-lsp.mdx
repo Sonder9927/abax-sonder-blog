@@ -1,0 +1,59 @@
+---
+title: 在vscode和lvim上配置ruff
+date: "2023-12-13"
+author: Sonder
+authorGithub: sonder9927
+authorImage: /images/uploads/zard-think.jpg
+category: custom
+tags:
+- vi
+- config
+- python
+description: Config ruff lsp in Vscode and Lvim.
+---
+
+# ruff
+[ruff](https://docs.astral.sh/ruff/)是用 Rust 编写的一个非常快的 Python linter 和代码格式化的程序。
+
+
+<img src="https://user-images.githubusercontent.com/1309177/232603516-4fb4892d-585c-4b20-b810-3db9161831e4.svg#only-light" alt="Linting the CPython codebase from scratch." width="72%" />
+
+## 命令行使用
+```sh
+
+# install
+pip install ruff
+
+# linter
+ruff check .          # Lint all files in the current directory.
+ruff check . --fix    # Lint all files in the current directory, and fix any fixable errors.
+ruff check . --watch  # Lint all files in the current directory, and re-lint on change.
+# formatter
+ruff format .  # Format all files in the current directory.
+```
+
+## ruff配置
+
+参考这个视频 [ Ruff 是 Python 开发的未来 ](https://www.bilibili.com/video/BV1fP41117r6/?spm_id_from=333.880.my_history.page.click&vd_source=c6295c977cbd3c06c9aa840e805a2f72)和他的 `pyproject.toml` [配置文件](https://github.com/parafoxia/analytix/blob/main/pyproject.toml)
+
+# lsp配置
+## lvim
+在 [LunarVim](https://www.lunarvim.org/docs/installation) 中使用 [ruff-lsp](https://github.com/astral-sh/ruff-lsp) 需要一些配置。
+
+- 安装：
+    ```vim
+    :LspInstall ruff_lsp
+    ```
+   或者在`mason`面板找到`ruff-lsp`，按 `i` 键安装。
+- 按照[官网给的例子](https://github.com/astral-sh/ruff-lsp#example-neovim)进行配置。
+我使用下来发现需要额外配置的功能是`format`和`hover`，其他功能像`codeaction`使用lvim原本的配置就能使用，即`<space>la`。
+但是`format`无法正常使用，我按照官网的配置设置过一次，能正常使用了，注释之后还能使用，可能这个设置没有被覆盖把。
+- 效果。
+  我是联合`pyrighe`一起用的，最后在打开python文件时右下角的会显示 `[pyright, ruff_lsp]`
+## vscode
+在vscode里使用插件[ruff-vscode](https://github.com/astral-sh/ruff-vscode)。
+
+可以参考视频[typing 标准库，让 IDE 重新拥有提示](https://www.bilibili.com/video/BV1Hp4y1M7gq?p=2&vd_source=c6295c977cbd3c06c9aa840e805a2f72)对vscode打开类型提示。
+
+
+

@@ -1,0 +1,310 @@
+---
+title: Customize VSCode simply
+date: "2023-11-06"
+author: Sonder
+authorGithub: sonder9927
+authorImage: /images/uploads/zard-think.jpg
+category: custom
+tags:
+- config
+description: 简单配置 vscode
+---
+
+# vscode
+
+无需多言，附上[官网](https://www.baidu.com/link?url=YJF0dKdRXhqGMohTaAA4CDGE50FaFRJFthsDp2O8tmBTZarddrcj6YoV_dHhXnbO&wd=&eqid=a33beda50002ffe80000000664a384ca)
+# configuration
+喜欢花哨，也追求速度
+
+借鉴了[和我一起配置 VSCode 吧](https://www.bilibili.com/video/BV1fF41197yQ/?spm_id_from=333.880.my_history.page.click&vd_source=c6295c977cbd3c06c9aa840e805a2f72)
+
+## apperence
+
+tmeme: Everforest
+
+icon(optional): Material Icom Theme
+
+zen: C-k + >zen
+
+## efficiency
+
+project: project manager
+
+select: expand-region
+
+template: template string converter
+
+run: code runner
+
+## lsp
+
+error: error lens
+
+lsp: ["eslint", "sort json objects", "markdonwlint"]
+
+# config file
+
+- `config.json`
+
+  ```jsonc
+
+  {
+    "editor.codeActionsOnSave": {
+      "source.fixAll.sortJSON": true,
+      "source.organizeImports": true
+    },
+    "editor.fontFamily": "Cascadia Code, Fira Code",
+    "editor.fontSize": 21,
+    // "editor.minimap.enabled": false, // 代码缩略图
+    "editor.lineNumbers": "relative",
+    "editor.linkedEditing": true,
+    "editor.stickyScroll.enabled": true,
+    "editor.suggest.insertMode": "replace",
+    "editor.wordWrap": "on",
+    "extensions.autoUpdate": "onlyEnabledExtensions",
+    "sortJSON.orderOverride": ["name", "version", "description"],
+    "sortJSON.orderUnderride": ["dependencies", "devDependencies"],
+    // project manager
+    "projectManager.git.baseFolders": ["E:\\merak\\workspace"],
+    "projectManager.sortList": "Recent",
+    // python
+    "python.condaPath": "E:\\merak\\anaconda3\\Scripts\\conda.exe",
+    "python.defaultInterpreterPath": "E:\\merak\\anaconda3\\envs\\rose\\python.exe",
+    "python.formatting.provider": "yapf", ///启用yapf，首先需要pip3 install yapf
+    "python.languageServer": "Default",
+    "python.linting.flake8Enabled": true, //启用flake8，首先需要pip3 install falke8
+    "notebook.lineNumbers": "on",
+    "security.workspace.trust.untrustedFiles": "open",
+    "terminal.integrated.fontFamily": "monospace",
+    // typescript
+    "typescript.preferences.importModuleSpecifier": "non-relative",
+    "typescript.updateImportsOnFileMove.enabled": "always",
+    "files.autoSave": "onFocusChange",
+    // vim
+    "vim.foldfix": true,
+    "vim.hlsearch": true,
+    "vim.leader": "<space>",
+    "vim.normalModeKeyBindingsNonRecursive": [
+      {
+        "before": ["leader", "w"],
+        "commands": [":w!"]
+      },
+      {
+        "before": ["leader", "q"],
+        "commands": [":q"]
+      },
+      {
+        "before": ["leader", "v"],
+        "commands": [":vsp"]
+      },
+      {
+        "before": ["<leader>", "/"],
+        "commands": ["editor.action.commentLine"],
+        "when": "editorTextFocus && !editorReadonly"
+      },
+      {
+        "before": ["<leader>", "l", "f"],
+        "commands": ["editor.action.formatDocument"]
+      },
+      {
+        "before": ["<leader>", "a", "s"],
+        "commands": ["editor.action.showHover"]
+      },
+      {
+        "before": ["leader", "a", "i"],
+        "commands": ["extension.toggleBool"]
+      },
+      {
+        "before": ["leader", "a", "f"],
+        "commands": ["editor.action.quickFix"]
+      },
+      {
+        "before": ["leader", "a", "p"],
+        "commands": ["editor.action.marker.prevInFiles"]
+      },
+      {
+        "before": ["leader", "a", "n"],
+        "commands": ["editor.action.marker.nextInFiles"]
+      }
+    ],
+    "window.zoomLevel": 1,
+    "workbench.colorTheme": "Everforest Dark",
+    // "workbench.iconTheme": "vscode-icons", //启用vscode图标
+    "workbench.settings.editor": "json",
+    "workbench.startupEditor": "none",
+    // zen
+    "zenMode.hideLineNumbers": false,
+    "terminal.integrated.defaultProfile.windows": "Command Prompt"
+    "[javascript]": {
+      "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "[jsonc]": {
+      "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "[json]": {
+      "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "git.path": "E:\\Download\\Git\\mingw64\\bin\\git.exe",
+    "vim.autoSwitchInputMethod.enable": true,
+    "vim.autoSwitchInputMethod.defaultIM": "2052", // 这是系统英文输入法
+    "vim.autoSwitchInputMethod.obtainIMCmd": "E:\\merak\\Downloads\\im-select.exe",
+    "vim.autoSwitchInputMethod.switchIMCmd": "E:\\merak\\Downloads\\im-select.exe {im}", // {im} 前面有空格
+    "gitlens.advanced.messages": {
+      "suppressLineUncommittedWarning": true
+    },
+    "code-runner.executorMap": {
+      "python": "$pythonPath -u $fullFileName"
+    },
+    "git.confirmSync": false
+  }
+  ```
+
+- `keybindings.json`
+
+  ```jsonc
+
+  // place your key bindings in this file to override the defaults
+  [
+    // explorer
+    {
+      "key": "ctrl+e",
+      "command": "workbench.action.toggleSidebarVisibility"
+    },
+    {
+      "key": "ctrl+e",
+      "command": "workbench.files.action.focusFilesExplorer",
+      "when": "editorTextFocus"
+    },
+    // extension
+    // vim
+    {
+      "key": "a",
+      "command": "explorer.newFile",
+      "when": "filesExplorerFocus && !inputFocus"
+    }, // create new file
+    {
+      "key": "r",
+      "command": "renameFile",
+      "when": "filesExplorerFocus && !inputFocus"
+    }, // rename file
+    {
+      "key": "y",
+      "command": "filesExplorer.copy",
+      "when": "filesExplorerFocus && !inputFocus"
+    }, // copy file
+    {
+      "key": "p",
+      "command": "filesExplorer.paste",
+      "when": "filesExplorerFocus && !inputFocus"
+    }, // paste file
+    {
+      "key": "r",
+      "command": "renameFile",
+      "when": "filesExplorerFocus && !inputFocus"
+    }, // rename file
+    // project manager
+    {
+      "key": "ctrl+g l",
+      "command": "projectManager.listGitProjects#sideBarGit"
+    }, // open projects which contain .git
+    // expand region
+    {
+      "key": "ctrl+=",
+      "command": "expand_region",
+      "when": "editorTextFocus"
+    },
+    {
+      "key": "ctrl+-",
+      "command": "undo_expand_region",
+      "when": "editorTextFocus && editorHasSelection"
+    },
+    // slidev
+    {
+      "key": "ctrl+s p",
+      "command": "slidev.prev"
+    },
+    {
+      "key": "ctrl+s r",
+      "command": "slidev.preview-refresh"
+    },
+    {
+      "key": "ctrl+s s",
+      "command": "workbench.view.extension.slidev"
+    },
+    {
+      "key": "ctrl+s v",
+      "command": "slidev-preview.focus"
+    },
+    {
+      "key": "ctrl+s l",
+      "command": "slidev-slides.focus"
+    },
+    {
+      "key": "ctrl+s i",
+      "command": "slidev.focus-side-panel"
+    },
+    {
+      "key": "ctrl+s n",
+      "command": "slidev.next"
+    },
+    {
+      "key": "ctrl+s j",
+      "command": "slidev.move-down"
+    },
+    {
+      "key": "ctrl+s k",
+      "command": "slidev.move-up"
+    },
+    {
+      "key": "ctrl+z",
+      "command": "workbench.action.toggleZenMode"
+    },
+    {
+      "key": "shift+enter",
+      "command": "code-runner.run"
+    },
+    {
+      "key": "ctrl+alt+n",
+      "command": "-code-runner.run"
+    },
+    {
+      "key": "ctrl+g g",
+      "command": "workbench.view.scm",
+      "when": "workbench.scm.active && !gitlens:disabled && config.gitlens.keymap == 'chorded'"
+    },
+    {
+      "key": "ctrl+shift+g g",
+      "command": "-workbench.view.scm",
+      "when": "workbench.scm.active && !gitlens:disabled && config.gitlens.keymap == 'chorded'"
+    },
+    {
+      "key": "ctrl+g p",
+      "command": "git.push"
+    },
+    {
+      "key": "ctrl+g shift+c",
+      "command": "git.commit"
+    },
+    {
+      "key": "ctrl+g s",
+      "command": "git.stage"
+    },
+    {
+      "key": "ctrl+g shift+s",
+      "command": "git.stageAllTracked"
+    },
+    {
+      "key": "ctrl+g c",
+      "command": "git.commitStaged"
+    },
+    {
+      "key": "ctrl+g oem_2",
+      "command": "gitlens.toggleLineBlame"
+    },
+    {
+      "key": "ctrl+g shift+p",
+      "command": "git.pull"
+    }
+  ]
+  ```
+

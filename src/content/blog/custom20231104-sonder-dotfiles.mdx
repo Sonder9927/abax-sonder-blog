@@ -1,0 +1,125 @@
+---
+title: 'Dotfiles: use git to backup configuration files.'
+date: "2023-11-04"
+author: Sonder
+authorGithub: sonder9927
+authorImage: /images/uploads/zard-think.jpg
+category: custom
+tags:
+- config
+- linux
+- git
+description: 'dotfiles: 利用 git 备份 linux 配置文件'
+---
+
+# 简介
+
+dotfiles:
+
+> User-specific application configuration is traditionally stored in so called [dotfiles](https://en.wikipedia.org/wiki/dotfile "wikipedia:dotfile") (files whose filename starts with a dot). It is common practice to track dotfiles with a [version control system](https://wiki.archlinux.org/title/Version_control_system "Version control system") such as [Git](https://wiki.archlinux.org/title/Git "Git") to keep track of changes and synchronize dotfiles across various hosts.
+
+即在系统中备份对不同应用的偏好设置（主要是`~/.config`里面的配置文件，也可以追踪其他文件），本文是从[利用 Git bare repo 版本控制配置文件 dotfiles](https://blog.csdn.net/weixin_43958105/article/details/119453385)这篇文章中学的，介绍利用git备份设置文件。
+
+选择git的原因：
+看过其他备份方式，大多是用`ln`软连接到一个文件夹，很麻烦，而且既然是一个备份的文件夹，当然要用云端存储，创建一个git的仓库再合适不过。将来换电脑直接将仓库下载下来就好，还可以分享。
+
+git --bare：使用 `git init --bare` 创建裸库。创建之后里面有很多文件，它主要是只保存历史提交的版本信息，不保存文件。其作用就是分享库，要先在 gitlab 或者 gitee 上创建项目，才能将裸库中的信息保存到远程仓库。
+
+# 配置
+
+## 创建本地仓库
+
+1. 原理是建立一个裸库，如果想上传到远程，最好在远程建好仓库后
+
+    ```sh
+    git clone --bare <github-url> $HOME/.dotfiles
+    ```
+
+    不使用则 `git init --bare` 在主目录下创建隐藏文件夹 `.dotfiles`
+
+    ```bash
+    git init --bare $HOME/.dotfiles
+    ```
+
+    隐藏文件可以使用 `ls -a` 查看。
+    这个仓库和正常库一样，有`status`、`add`、`commit`、`push`功能。
+2. 创建一个专属的 `dotfiles` 命令。
+
+    本意是，在任何目录处，想要利用 `git` 查看这个仓库信息，需要用 `git --git-dir $HOME/.dotfiles --work-tree $HOME`这个命令，使用`alias`功能创建一个别名会方便很多，这里设置为 `dotfiles`。
+
+    根据`shell`类型，在`~/.bashrc` 或 `~/.zshrc`中添加：
+
+    ```sh
+    alias dotfiles='git --git-dir $HOME/.dotfiles --work-tree $HOME'
+    ```
+
+    如果是`fish`，可以新增加一个函数文件`~/.config/fish/functions/dotfiles.fish`：
+
+    ```fish
+
+    function dotfiles
+      git --git-dir={$HOME}/.dotfiles --work-tree={$HOME} $argv
+    end
+    ```
+
+以 `$HOME` 作为工作目录会导致 Git 默认可以跟踪 $HOME 下所有文件，通过设置 Git 默认不跟踪任何文件，手动添加需要追踪的文件或文件夹即可：
+
+```sh
+
+cd ~/.dotfiles
+dotfiles config --local status.showUntrackedFiles no
+```
+
+注意：
+
+- 大多时候我们只关注配置文件，所以尽量不要追踪整个文件夹的变化。
+- `--git-dir` 和 `--work-tree`要放在git和git命令之间。如`git --git-dir=... status`
+
+## 推送到远程
+
+将本地`commit`之后，使用`push`推送到远程仓库。
+第一次推送本地到远程比较特别：
+
+```sh
+
+dotfiles remote add origin git@github.com:{user}/{repo}.git
+dotfiles push -u origin master
+```
+
+github 也可以替换为gitee。
+如果出现问题，下面的命令可能有帮助：
+
+```sh
+
+dotfiles remote -v # 错误添加远程仓库
+dotfiles remote remove {repo}
+dotfiles pull origin main --allow-unrelated-histories # 合并两个不想关的仓库
+```
+
+但是注意现在github创建仓库默认分支是 main，本地的仓库可能是 master。
+可以用 `git branch -m master main` 这个命令将 master 改名为 main，然后 `dotfiles push -u origin main`。
+
+## 使用
+
+```sh
+
+dotfiles status
+dotfiles add ~/.config/lvim/config.lua
+dotfiles commit 'add lvim config'
+dotfiles push
+```
+
+不要追踪整个文件夹，也避免使用`dotfiles add .`
+
+## 从远程下载
+
+换了电脑之后，下载这个仓库并`checkout`。注意下载的只是配置文件，相应的应用还是要自己下载，为此可以专门写一个下载脚本，保存在仓库里。
+
+```sh
+
+echo ".dotfiles" > $HOME/.gitignore # 避免一些无限递归的bug，一般不用这一步
+git clone --bare git@github:{user}/{repo}.git $HOME/.dotfiles
+git --git-dir=$HOME/.dotfiles --work-tree=$HOME checkout -f # 这里还没有复原dotfiles的配置命令
+dotfiles config --local status.showUntrackedFiles no # 复原配置后才能使用dotfiles命令
+bash /path/to/downloadApps.sh # 可以备份一个下载常用软件的脚本
+```

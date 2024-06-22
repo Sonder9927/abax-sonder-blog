@@ -1,0 +1,82 @@
+---
+title: Customize zotero
+date: "2023-11-07"
+author: Sonder
+authorGithub: sonder9927
+authorImage: /images/uploads/zard-think.jpg
+category: custom
+tags:
+- config
+- zotero
+- obsidian
+description: 'Zotero：配置及插件'
+---
+
+# 介绍
+文献管理软件 - [Zotero](https://www.zotero.org/)，配置及插件。详细的原文见[文献管理软件 Zotero 常用插件安装及配置使用](https://blog.csdn.net/qq_43309940/article/details/117126357)
+
+# 配置
+## 阅读
+配合[小绿鲸](https://www.xljsci.com/)使用。编辑 -> 首选项->打开PDF使用->选择小绿鲸
+## 同步
+1. 点击编辑 -> 首选项，弹出 zotero 首选项设置窗口
+2. 同步 -> 设置：配置坚果云同步
+
+    参考[Zotero | 用坚果云无限扩展文献存储空间](https://mp.weixin.qq.com/s?__biz=MzAxNzgyMDg0MQ==&mid=2650454799&idx=3&sn=b89bf02dce73529d33728b418f055f98&chksm=83d1a6c9b4a62fdf67039411867c745da2b39d270c3fcaf507a889a6ba6d67e138a6ab03a737&scene=21#wechat_redirect)这篇。
+
+<img src="/images/post-images/zotero/zotero-sync.png" alt="sync" width="67%" />
+
+<img src="/images/post-images/zotero/zotero-advanced.png" alt="advanced" width="67%" />
+
+## scihub
+[Sci-Hub](https://www.scihub.net.cn/sci-hub/) 是巴基斯坦的一位女神创办的良心大大的网站，可以免费下载大部分文献，貌似较新的不行。
+
+1. 打开 Zotero 的首选项，点击高级–> 设置编辑器
+2. 搜索 extensions.zotero.findPDFs.resolvers，双击
+3. 删除默认的 `[]`，并将以下代码粘贴进去并点击 ok
+
+    ```json
+
+    {
+        "name":"Sci-Hub",
+        "method":"GET",
+        "url":"https://sci-hub.ren/{doi}",
+        "mode":"html",
+        "selector":"#pdf",
+        "attribute":"src",
+        "automatic":true
+    }
+    ```
+
+# 插件
+
+- [ZotFile](http://zotfile.com/) 插件
+  自动重命名，生成新项目，将 PDF 从 Zotero 库同步到您的（移动）PDF 阅读器（例如 iPad，Android 平板电脑等）并从 PDF 文件中提取注释。
+  点击 zotero 工具 ，将下载好的.xpi 插件拖入，可能会提示重启
+  配置：
+    <img src="/images/post-images/zotero/zotero-zotfile1.png" alt="zotfile" width="49%" />
+    <img src="/images/post-images/zotero/zotero-zotfile2.png" alt="zotfile" width="49%" />
+    <img src="/images/post-images/zotero/zotero-zotfile3.png" alt="zotfile" width="49%" />
+
+- [Better BibTeX](https://retorque.re/zotero-better-bibtex/index.html)
+  文献导出引用格式：`(auth+year+"-"+shorttitle.ideographs.select(1,0)).lower`
+- Zotero translators
+  Zotero translators是一款Zotero的中文网页抓取插件，用于维护各种中文翻译器。不安装这个插件会出现无法抓取知网等中文文献元数据。
+
+  [Zotero translators github 下载及使用说明主页](https://github.com/l0o0/translators_CN)
+
+  解压压缩包，将该目录中所需的js文件复制到 Zotero 的 translators 目录(首选项 -> 高级 -> 打开数据文件夹)
+
+- Jasminum 茉莉花
+  [Jasminum](https://github.com/l0o0/jasminum)，一个简单的 Zotero 中文插件，旨在提升 Zotero 中文用户的使用体验。主要功能有：
+
+  1. 中文期刊附件（PDF/CAJ）的元数据抓取，支持添加 PDF/CAJ 时自动抓取元数据功能
+  2. 集成 Zotero 中文社区转换器的下载与更新功能
+  3. 为知网学位论文 PDF 添加章节书签（依赖于 PDFtk）
+  4. 更新中文文献引用次数，核心期刊信息
+  5. 合并 / 拆分姓，名，识别文献条目语言，下载知网附件，统一日期格式等
+
+  <img src="/images/post-images/zotero/zotero-jasminum.png" alt="Jasminum" width="67%" />
+
+  主要是为了抓取中文文献的元数据，右键条目->知网助手->抓取知网元数据
+
