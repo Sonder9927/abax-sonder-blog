@@ -1,0 +1,73 @@
+---
+title: Inversion Problem Basics
+date: "2024-09-19"
+author: Sonder
+authorGithub: sonder9927
+authorImage: /images/uploads/zard-think.jpg
+category: custom
+tags:
+- math
+- inversion
+- geophysics
+description: Gm=d
+---
+
+# 反演
+
+$Gm=d$ 或者是 $G(m)=d$。
+
+## 问题描述
+
+数据核矩阵 $G$，模型向量 $m$，观测数据向量为 $d$。
+我们的目标是找到 $m$，使得 $G(m)=d$ 或者使 $E=d-G(m)$最小。
+这被称为反演问题。
+
+## 走时反演
+
+**远震反演**中 $d$ 为相对走时，解得为模型扰动 $\delta m$。
+据此修改**近震反演**方式。
+
+* 传统的近震反演时求解绝对速度：
+
+$$
+G(m)=d_{pre}
+$$
+$$
+E=d_{obs}-d_{pre}
+$$
+$$
+E=d_{obs}-G(m)
+$$
+
+* 改为相对走时的形式：
+
+$$
+G(\delta m)=\delta d_{pre}
+$$
+$$
+E=\delta d_{obs}-\delta d_{pre}
+$$
+$$
+E=(d_{obs}-d_0)-G(\delta m)
+$$
+
+以此求解模型扰动 $\delta m$，从而能够获得相对走时 $\delta d$。
+
+## 联合反演
+
+联合近震远震的走时反演，求解模型扰动 $\delta m$。
+
+$$
+\begin{pmatrix}
+G_{tele} \\
+G_{local}
+\end{pmatrix}
+\delta m
+=
+\begin{pmatrix}
+\delta d_{tele} \\
+\delta d_{local}
+\end{pmatrix}
+$$
+
+

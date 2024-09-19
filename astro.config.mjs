@@ -11,6 +11,8 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 import remarkCodeTitles from 'remark-code-titles'
 import decapCmsOauth from "astro-decap-cms-oauth";
+import remarkMath from 'remark-math';
+import rehypeKatex from 'rehype-katex';
 
 // Full Astro Configuration API Documentation:
 // https://docs.astro.build/reference/configuration-reference
@@ -18,7 +20,7 @@ import decapCmsOauth from "astro-decap-cms-oauth";
 // https://astro.build/config
 export default defineConfig( /** @type {import('astro').AstroUserConfig} */{
   output: 'server',
-  site: 'https://astro-ink.vercel.app', // Your public domain, e.g.: https://my-site.dev/. Used to generate sitemaps and canonical URLs.
+  site: 'https://abax-sonder.vercel.app/', // Your public domain, e.g.: https://my-site.dev/. Used to generate sitemaps and canonical URLs.
   server: {
     // port: 4321, // The port to run the dev server on.
   },
@@ -28,7 +30,11 @@ export default defineConfig( /** @type {import('astro').AstroUserConfig} */{
       theme: 'css-variables',
     },
     remarkPlugins: [
+      remarkMath,  // 添加对数学公式解析的插件
       remarkCodeTitles
+    ],
+    rehypePlugins: [
+      rehypeKatex  // 添加对公式渲染的插件
     ]
   },
   integrations: [
