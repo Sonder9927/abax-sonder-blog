@@ -14,6 +14,7 @@ description: Config Nushell on windows.
 ---
 
 # 介绍
+
 [Nushell](https://nushell.sh) 的启动非常快，决定在 Windows 上使用 Wezterm + Nushell + starship。
 
 ## 安装
@@ -31,15 +32,18 @@ nu
 两个文件的路径可以通过调用 `echo $nu.env-path` 和 `echo $nu.config-path` 找到。`env.nu` 是用来定义环境变量的，定义的环境变量将在 `config.nu` 中可用，`config.nu` 可以用来在全局命名空间中添加定义、别名等等。
 
 # 相关配置
+
 ## starship 美化
 
 `env.nu`:
+
 ```nu
 mkdir ~/.cache/starship
 starship init nu | save -f ~/.cache/starship/init.nu
 ```
 
 `cofig.nu`:
+
 ```nu
 source ~/.cache/starship/init.nu
 ```
@@ -76,4 +80,3 @@ config.set_environment_variables = {
 ```
 
 然后，设置 Nushell 为默认 shell。
-
