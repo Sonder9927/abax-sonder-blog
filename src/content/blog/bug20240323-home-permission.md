@@ -24,7 +24,6 @@ ls -ld ~
 2. 确保您是家目录的所有者。如果不是，可以使用`chown`命令将其更改为自己。
 
 ```sh
-
 sudo chown -R your_username:your_username ~
 sudo chgrp -R your_groupname ~
 ```

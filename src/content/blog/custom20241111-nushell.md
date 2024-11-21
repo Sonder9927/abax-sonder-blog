@@ -1,6 +1,6 @@
 ---
 title: Wezterm + Nushell + starship on Windows
-date: "2024-12-21"
+date: "2024-11-11"
 author: Sonder
 authorGithub: sonder9927
 authorImage: /images/uploads/zard-think.jpg

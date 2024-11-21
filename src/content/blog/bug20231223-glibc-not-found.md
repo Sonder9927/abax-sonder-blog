@@ -28,7 +28,6 @@ ubuntu 系统的最高版本没到要求，得手动更新源。
     ```
 3. 升级
     ```sh
-
     sudo apt-get update
     sudo apt-get install libc6
     ```

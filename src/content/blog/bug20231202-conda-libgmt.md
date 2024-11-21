@@ -39,7 +39,6 @@ export GMT_LIBRARY_PATH=/path/to/lib
 2. 不激活`rose`，设置环境变量 
 
     ```sh
-
     set -x GMT_LIBRARY "/path/to/miniconda3/envs/rose/lib"
     ls $GMT_LIBRARY | grep gmt
 
