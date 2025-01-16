@@ -16,12 +16,10 @@ description: Use python to merge pdf figures.
 
 # 代码
 ```sh
-
 conda install pillow
 ```
 
 ```python
-
 from PIL import Image
 from pathlib import Path
 
