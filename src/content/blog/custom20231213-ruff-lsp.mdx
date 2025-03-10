@@ -19,8 +19,8 @@ description: Config ruff lsp in Vscode and Lvim.
 <img src="https://user-images.githubusercontent.com/1309177/232603516-4fb4892d-585c-4b20-b810-3db9161831e4.svg#only-light" alt="Linting the CPython codebase from scratch." width="72%" />
 
 ## 命令行使用
-```sh
 
+```sh
 # install
 pip install ruff
 
@@ -49,7 +49,7 @@ ruff format .  # Format all files in the current directory.
 我使用下来发现需要额外配置的功能是`format`和`hover`，其他功能像`codeaction`使用lvim原本的配置就能使用，即`<space>la`。
 但是`format`无法正常使用，我按照官网的配置设置过一次，能正常使用了，注释之后还能使用，可能这个设置没有被覆盖把。
 - 效果。
-  我是联合`pyrighe`一起用的，最后在打开python文件时右下角的会显示 `[pyright, ruff_lsp]`
+  我是联合`pyright`一起用的，最后在打开python文件时右下角的会显示 `[pyright, ruff_lsp]`
 ## vscode
 在vscode里使用插件[ruff-vscode](https://github.com/astral-sh/ruff-vscode)。
 

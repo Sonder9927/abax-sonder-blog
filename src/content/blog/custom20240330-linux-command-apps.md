@@ -94,9 +94,9 @@ npm i -g projj nrm
 下载 [lua 源码](https://www.lua.org/download.html) 安装 [lua](https://www.lua.org/)
 
 ```sh
-curl -L -R -O https://www.lua.org/ftp/lua-5.4.6.tar.gz
-tar zxf lua-5.4.6.tar.gz
-cd lua-5.4.6
+curl -L -R -O https://www.lua.org/ftp/lua-5.4.7.tar.gz
+tar zxf lua-5.4.7.tar.gz
+cd lua-5.4.
 make all test
-./install
+make all install
 ```
