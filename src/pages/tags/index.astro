@@ -9,22 +9,53 @@ let description = 'All the tags used so far...'
 
 
 const allPosts = await getCollection('blog');
-const tags = [...new Set([].concat.apply([], allPosts.map(post => post.data.tags)))]
+const tagCounts = allPosts.reduce((counts, post) => {
+    post.data.tags.forEach((tag) => {
+        counts.set(tag, (counts.get(tag) ?? 0) + 1)
+    })
+
+    return counts
+}, new Map<string, number>())
+
+const tags = [...tagCounts.entries()]
+    .map(([name, count]) => ({ name, count }))
+    .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name))
 ---
 
 <DefaultPageLayout content={{ title, description }}>
+    <div class="tags-overview">
+        <span>{tags.length} tags</span>
+        <span>{allPosts.length} posts</span>
+    </div>
     <ul class="tag-list">
      {tags.map((tag) => (
-        <li><a class="tag" href={`/tags/${tag}`} title={`View posts tagged under "${tag}"`} transition:animate="slide">{tag}</a></li>
+        <li>
+            <a class="tag" href={`/tags/${tag.name}`} title={`View posts tagged under "${tag.name}"`} transition:animate="slide">
+                <span class="tag__name">{tag.name}</span>
+                <span class="tag__count">{tag.count}</span>
+            </a>
+        </li>
     ))}
     </ul>
 </DefaultPageLayout>
 
 <style>
+    .tags-overview {
+        @apply mb-8 flex flex-wrap gap-3 text-sm uppercase tracking-wider text-gray-500 dark:text-gray-400;
+    }
+    .tags-overview span {
+        @apply border-l-4 border-theme-primary dark:border-theme-dark-primary pl-3;
+    }
     .tag-list {
-        @apply list-none flex gap-2 flex-wrap
+        @apply list-none flex flex-wrap gap-2 p-0;
     }
     .tag {
-        @apply inline-block text-xl px-4 py-1 rounded-full text-theme-primary bg-theme-dark-primary dark:bg-theme-primary dark:text-theme-dark-primary hover:bg-theme-primary hover:text-theme-dark-primary dark:hover:bg-theme-dark-primary dark:hover:text-theme-primary
+        @apply inline-flex items-center gap-2 rounded-full border border-gray-200 dark:border-gray-700 px-3 py-1.5 no-underline text-theme-primary dark:text-theme-dark-primary bg-white/70 dark:bg-gray-900/40 transition hover:-translate-y-0.5 hover:border-theme-primary hover:bg-theme-dark-primary hover:text-white dark:hover:border-theme-dark-primary dark:hover:bg-theme-primary dark:hover:text-theme-dark-primary;
+    }
+    .tag__name {
+        @apply max-w-52 truncate text-base font-semibold;
+    }
+    .tag__count {
+        @apply shrink-0 rounded-full bg-gray-100 px-2 py-0.5 text-xs font-bold text-gray-600 dark:bg-gray-800 dark:text-gray-300;
     }
 </style>

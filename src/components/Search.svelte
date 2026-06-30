@@ -3,17 +3,40 @@
     import SearchIcon from './SearchIcon.svelte'
     import PostSearchPreview from './PostSearchPreview.svelte'
 
-    let searchInput
-    let searchableDocs
+    type SearchDoc = {
+        slug: string
+        category: string
+        title?: string
+        description?: string
+        tags?: string[]
+        body?: string
+        searchText?: string
+    }
+
+    let searchInput: HTMLInputElement
+    let searchableDocs: SearchDoc[] = []
     let searchIndex
 
     let searchQuery = ''
-    let searchResults = []
+    let searchResults: SearchDoc[] = []
+
+    const normalize = (value: unknown) => String(value ?? '').toLowerCase()
+
+    const buildSearchText = (doc: SearchDoc) => normalize([
+        doc.title,
+        doc.description,
+        doc.tags?.join(' '),
+        doc.body,
+        doc.slug,
+    ].join(' '))
 
     onMount(async() => {
         const lunr = (await import('lunr')).default
         const resp = await fetch('/search-index.json')
-        searchableDocs = await resp.json()
+        searchableDocs = (await resp.json()).map((doc: SearchDoc) => ({
+            ...doc,
+            searchText: buildSearchText(doc),
+        }))
             // Initialize indexing
         searchIndex = lunr(function(){
             // the match key...
@@ -36,16 +59,26 @@
     })
 
     $: {
-        if(searchQuery && searchQuery.length >= 3) {
-           const matches = searchIndex.search(searchQuery)
-           searchResults = []
-           matches.map(match => {
-               searchableDocs.filter(doc => {
-                    if(match.ref === doc.slug) {
-                        searchResults.push(doc)
-                    }
-               })
-           })
+        const query = searchQuery.trim().toLowerCase()
+        if(query && searchIndex && searchableDocs.length) {
+            const resultBySlug = new Map<string, SearchDoc>()
+
+            try {
+                searchIndex.search(query).forEach((match) => {
+                    const doc = searchableDocs.find((item) => item.slug === match.ref)
+                    if(doc) resultBySlug.set(doc.slug, doc)
+                })
+            } catch {
+                // Fallback below still supports punctuation-heavy or CJK queries.
+            }
+
+            searchableDocs
+                .filter((doc) => doc.searchText?.includes(query))
+                .forEach((doc) => resultBySlug.set(doc.slug, doc))
+
+            searchResults = [...resultBySlug.values()]
+        } else {
+            searchResults = []
         }
     }
 </script>

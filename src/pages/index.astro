@@ -11,7 +11,9 @@ const title = "Home";
 const description =
   "Abax gathers and disperses like life and death without any trace.";
 
-const posts = await getCollection("blog");
+const posts = (await getCollection("blog"))
+  .sort((a, b) => new Date(b.data.date).valueOf() - new Date(a.data.date).valueOf())
+  .slice(0, 3);
 ---
 
 <!-- src="https://w.wallhaven.cc/full/rd/wallhaven-rdwjj7.jpg" -->
@@ -32,7 +34,7 @@ const posts = await getCollection("blog");
     </div>
   </div>
   <hr />
-  <PostPreviewList posts={posts.slice(0, 3)} heading="recent posts" />
+  <PostPreviewList posts={posts} heading="recent posts" />
   <div class="page__actions">
     <a class="action__go-to-blog ink-h" href="/blog" title="All Posts"
       >All Posts &rarr;</a
