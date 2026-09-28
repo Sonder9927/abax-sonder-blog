@@ -1,6 +1,6 @@
 ---
 title: '沙箱写文件后 permission denied：Windows ACL 与完整性级别排查'
-date: "2025-09-28"
+date: "2026-09-28"
 author: Sonder
 authorGithub: sonder9927
 authorImage: /images/uploads/zard-think.jpg
